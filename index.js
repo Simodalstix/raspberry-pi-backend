@@ -52,3 +52,7 @@ app.delete("/posts/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete post" });
   }
 });
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "API is healthy" });
+});
