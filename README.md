@@ -1,6 +1,6 @@
 # Raspberry Pi Backend
 
-This is a simple Dockerized Node.js + PostgreSQL backend deployed to a Raspberry Pi. It serves as the backend for a blog API, exposing basic CRUD functionality. The project is integrated with GitHub Actions for CI/CD and is reverse proxied through NGINX Proxy Manager with SSL provided by Let's Encrypt.
+This is my proudest project because it brings everything together — running a real backend service on a Raspberry Pi using tools I’ve genuinely enjoyed learning. It uses Docker, GitHub Actions, and NGINX Proxy Manager for secure reverse proxying, with deployments automated over SSH. Getting the networking right, exposing the API publicly, and wiring it all together on local hardware taught me a lot — and it made the whole thing feel real.
 
 ## Stack
 
@@ -23,6 +23,8 @@ This is a simple Dockerized Node.js + PostgreSQL backend deployed to a Raspberry
 Once deployed, the backend is available at: https://api.simostack.com/posts
 
 ## API
+
+Very simple for now - this is just the start.
 
 ### GET /posts
 
