@@ -4,14 +4,14 @@ services:
   backend:
     build: .
     ports:
-      - "3000:3000"
+      - "3080:3000" # Use 3080 on host, map to 3000 inside container
     depends_on:
       - db
     env_file:
       - .env
 
   db:
-    image: postgres:14
+    image: postgres:15
     restart: always
     environment:
       POSTGRES_USER: $POSTGRES_USER

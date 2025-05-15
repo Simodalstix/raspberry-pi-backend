@@ -21,3 +21,34 @@ app.get("/posts", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
+
+app.post("/posts", async (req, res) => {
+  const { title, content } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO posts (title, content) VALUES ($1, $2) RETURNING *",
+      [title, content]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Error inserting post:", err);
+    res.status(500).json({ error: "Failed to insert post" });
+  }
+});
+
+app.delete("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      "DELETE FROM posts WHERE id = $1 RETURNING *",
+      [id]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    res.json({ message: "Post deleted", post: result.rows[0] });
+  } catch (err) {
+    console.error("Error deleting post:", err);
+    res.status(500).json({ error: "Failed to delete post" });
+  }
+});
