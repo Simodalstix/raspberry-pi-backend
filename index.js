@@ -1,8 +1,10 @@
+const cors = require("cors");
 const express = require("express");
 const { Pool } = require("pg");
 require("dotenv").config();
 
 const app = express();
+app.use(cors({ origin: "https://simostack.com", methods: ["GET", "POST"] }));
 app.use(express.json());
 
 const pool = new Pool({
