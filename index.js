@@ -4,7 +4,23 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: "https://simostack.com", methods: ["GET", "POST"] }));
+const allowedOrigins = ["https://simostack.com", "http://localhost:5173"];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
 const pool = new Pool({
