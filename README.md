@@ -1,60 +1,77 @@
-# Raspberry Pi Backend
+# Raspberry Pi Backend API
 
-This is my proudest project because it brings everything together — running a real backend service on a Raspberry Pi using tools I’ve genuinely enjoyed learning. It uses Docker, GitHub Actions, and NGINX Proxy Manager for secure reverse proxying, with deployments automated over SSH. Getting the networking right, exposing the API publicly, and wiring it all together on local hardware taught me a lot — and it made the whole thing feel real.
+This is one of my proudest projects — a fully containerized backend service running on a Raspberry Pi, wired up with reverse proxying, CI/CD, and secure public access. It pulls together everything I’ve learned about Docker, deployment automation, network config, and running real services on local hardware.
 
 ## Stack
 
-- **Node.js + Express** – REST API
-- **PostgreSQL** – Relational database
-- **Docker + Docker Compose** – Containerized application
-- **NGINX Proxy Manager** – Reverse proxy and SSL termination
-- **DuckDNS** – Dynamic DNS mapping to Raspberry Pi’s changing IP
-- **GitHub Actions** – Automated deployment pipeline on push to `main` branch
+- **Node.js + Express** — REST API
+- **PostgreSQL** — Relational database
+- **Docker + Docker Compose** — Containerized deployment
+- **NGINX Proxy Manager** — Reverse proxy & SSL via Let’s Encrypt
+- **DuckDNS** — Dynamic DNS to track Pi’s public IP
+- **GitHub Actions** — CI/CD pipeline triggered on `main` branch push
+- **CORS** — Locked down to specific frontend origins
 
 ## Project Goals
 
-- Build a real-world backend service that runs on local hardware (Raspberry Pi)
-- Practice infrastructure setup with Docker, environment management, and persistent storage
-- Enable a secure public API endpoint using SSL and reverse proxying
-- Automate deployments using GitHub Actions and SSH
+- Run a real backend on a Raspberry Pi with production-style patterns
+- Practice container orchestration, persistent volumes, and network exposure
+- Secure the API with reverse proxy, SSL, and strict CORS policies
+- Automate deployments via GitHub Actions over SSH
 
-## Endpoint
+## Public Endpoint
 
-Once deployed, the backend is available at: https://api.simostack.com/posts
+Once deployed, the backend is live at:  
+`https://api.simostack.com/posts`
 
-## API
+Includes a `/health` endpoint for uptime monitoring.
 
-Very simple for now - this is just the start.
+## API Overview
 
-### GET /posts
+**GET /posts** — Returns all blog posts  
+**POST /posts** — Creates a new post  
+**DELETE /posts/:id** — Deletes a post by ID  
+**GET /health** — Simple API health check
 
-Returns all blog posts.
+## CI/CD Deployment
 
-### POST /posts
+1. Push to `main` triggers a GitHub Actions workflow
+2. Workflow connects to Raspberry Pi over SSH using a deploy key
+3. App is pulled and restarted via `docker-compose`
 
-Creates a new post.
+### GitHub Secrets Used
 
-### DELETE /posts/:id
+| Secret          | Description                         |
+| --------------- | ----------------------------------- |
+| `PI_HOST`       | DuckDNS hostname of Raspberry Pi    |
+| `PI_DEPLOY_KEY` | Private SSH key used for deployment |
 
-Deletes a post by ID.
+## NGINX Proxy Configuration
 
-## Deployment Pipeline
+Traffic to `api.simostack.com` is forwarded by **NGINX Proxy Manager** to the internal backend on port `3080`. SSL is handled automatically via **Let’s Encrypt**, and CORS is restricted to specific trusted domains.
 
-1. **Push to `main`** triggers a GitHub Actions workflow.
-2. The workflow connects to the Raspberry Pi over SSH using a deploy key.
-3. It pulls the latest code and restarts the containers using Docker Compose.
+## CORS Setup
 
-### Workflow Secrets
+The API is restricted to calls from `https://simostack.com` and `http://localhost:5173`, to allow safe development and production usage. All other origins are rejected silently.
 
-| Secret Name     | Purpose                                         |
-| --------------- | ----------------------------------------------- |
-| `PI_HOST`       | DuckDNS hostname of the Raspberry Pi            |
-| `PI_DEPLOY_KEY` | Private SSH key for GitHub-to-Pi authentication |
+## Code Snippet (CORS Configuration)
 
-## NGINX Proxy Setup
+```js
+const allowedOrigins = ["https://simostack.com", "http://localhost:5173"];
 
-NGINX Proxy Manager is used to forward public requests from `api.simostack.com` to the internal backend running on port `3080`, with SSL certificates managed via Let's Encrypt.
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false); // reject unknown origins
+    },
+    methods: ["GET", "POST", "DELETE"],
+  })
+);
+```
 
 ## License
 
-This project is for educational and personal development use.
+This project is open-source and built for personal development and learning.
